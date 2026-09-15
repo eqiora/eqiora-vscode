@@ -11,7 +11,8 @@ connects its language server to VS Code and renders its inspection results.
 ## Features
 
 - **Editing:** canonical highlighting, snippets, brackets, comments, indentation,
-  diagnostics, formatting, hover, definitions, references, symbols and folding.
+  diagnostics, formatting, hover with reference/textbook links, definitions, references,
+  symbols and folding.
 - **Equation Preview:** live LaTeX display with accessible MathML/plain text,
   source navigation, cursor highlighting, model selection and LaTeX export.
 - **Model Hierarchy:** nested declarations with navigation to source.
@@ -32,6 +33,7 @@ Download the `.vsix` matching your workspace host from
 [GitHub Releases](https://github.com/nkiyohara/eqiora-vscode/releases), then choose
 **Extensions → … → Install from VSIX**. Release packages include the matching
 language server. Marketplace and Open VSX listings are not yet published.
+Native packages are available for Linux x64, Windows x64 and macOS Apple Silicon.
 
 For source builds without a bundled server, install the server from the exact
 Eqiora revision in [upstream.json](upstream.json), or use **Eqiora: Select Language

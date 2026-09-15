@@ -9,7 +9,8 @@ for the canonical formatter and the Outline or Eqiora activity bar for declarati
 
 Choose **Eqiora: Open Equation Preview** to view generated mathematics beside the
 source. Edit the source to refresh it. Select a quantity in the preview to read its
-definition. Hovering code uses the language server's declaration documentation.
+definition. Hovering code shows the language server's declaration documentation and links to
+the language reference and mathematical textbook.
 Use **Eqiora: Open Eqiora Guide** to open the linked textbook.
 
 ## Commands

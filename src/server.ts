@@ -74,6 +74,17 @@ export class Servers implements vscode.Disposable {
       workspaceFolder: folder,
       outputChannel: this.output,
       initializationOptions: { eqioraInspection: 1 },
+      middleware: {
+        provideHover: async (document, position, token, next) => {
+          const hover = await next(document, position, token);
+          if (!hover) return hover;
+          const guide = new vscode.MarkdownString(
+            "[Language reference](https://eqiora.org/reference/language/) · [Learn the mathematics](https://eqiora.org/learn/)",
+          );
+          guide.isTrusted = false;
+          return new vscode.Hover([...hover.contents, guide], hover.range);
+        },
+      },
     };
     const client = new LanguageClient(
       "eqiora",
