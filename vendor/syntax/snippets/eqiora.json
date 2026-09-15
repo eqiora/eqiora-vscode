@@ -1,0 +1,22 @@
+{
+  "Connector": {
+    "prefix": "connector",
+    "body": ["connector ${1:Pin} {", "  across ${2:voltage}: ${3:V};", "  through ${4:current}: ${5:A};", "}"],
+    "description": "Declare a nominal scalar connector with named physical members"
+  },
+  "Component": {
+    "prefix": "component",
+    "body": ["public component ${1:Name}() {", "  $0", "}"],
+    "description": "Declare a public Eqiora component"
+  },
+  "Model": {
+    "prefix": "model",
+    "body": ["public model ${1:Name}() {", "  $0", "}"],
+    "description": "Declare a public Eqiora model"
+  },
+  "Relation": {
+    "prefix": "relation",
+    "body": ["relation ${1:name} on ${2:domain} {", "  ${3:left} = ${4:right};", "}"],
+    "description": "Declare a continuous relation"
+  }
+}

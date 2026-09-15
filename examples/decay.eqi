@@ -1,0 +1,6 @@
+/// Exponential decay. Compare x(t) with exp(-rate * t).
+model Decay(parameter rate: 1 / s = 1) {
+    state x: 1;
+    initial { x = 1; }
+    relation decay { derivative(x) = -rate * x; }
+}

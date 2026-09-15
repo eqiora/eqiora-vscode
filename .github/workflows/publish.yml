@@ -1,0 +1,52 @@
+name: Publish registries
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tested GitHub release tag
+        required: true
+      registry:
+        description: Publication destination
+        type: choice
+        options: [open-vsx, marketplace]
+        required: true
+permissions:
+  contents: read
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: publishing
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Download and verify release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh release download "$RELEASE_TAG" --dir release-assets --pattern '*.vsix' --pattern '*.sha256'
+          cd release-assets
+          sha256sum -c ./*.sha256
+      - name: Publish to Open VSX
+        if: inputs.registry == 'open-vsx'
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          test -n "$OVSX_PAT" || { echo 'Configure the publishing environment OVSX_PAT secret.'; exit 1; }
+          for package in release-assets/*.vsix; do npx ovsx publish "$package"; done
+      - name: Publish to Marketplace
+        if: inputs.registry == 'marketplace'
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          test -n "$VSCE_PAT" || { echo 'Configure publishing authentication; see docs/publishing.md for Entra ID migration.'; exit 1; }
+          npx vsce publish --packagePath release-assets/*.vsix
