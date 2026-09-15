@@ -1,15 +1,26 @@
 import * as vscode from "vscode";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import type { Inspection } from "../src/model";
 export async function run(): Promise<void> {
   const executable = process.env.EQIORA_SERVER;
   if (!executable)
-    throw new Error(
-      "EQIORA_SERVER is required for the real language-server editor test.",
+    assert.ok(
+      existsSync(
+        path.resolve(
+          __dirname,
+          "../server",
+          process.platform === "win32"
+            ? "eqiora-language-server.exe"
+            : "eqiora-language-server",
+        ),
+      ),
+      "Build the bundled server or set EQIORA_SERVER for the editor test.",
     );
   await vscode.workspace
     .getConfiguration("eqiora")
-    .update("server.path", executable, vscode.ConfigurationTarget.Global);
+    .update("server.path", executable ?? "", vscode.ConfigurationTarget.Global);
   const doc = await vscode.workspace.openTextDocument(
     vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, "decay.eqi"),
   );

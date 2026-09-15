@@ -59,17 +59,15 @@ jobs:
       - name: Test the real editor and server (Linux)
         if: runner.os == 'Linux'
         shell: bash
-        run: EQIORA_SERVER="$PWD/server/eqiora-language-server" xvfb-run -a npm run test:editor
+        run: xvfb-run -a npm run test:editor
       - name: Test the real editor and server (macOS)
         if: runner.os == 'macOS'
         shell: bash
-        run: EQIORA_SERVER="$PWD/server/eqiora-language-server" npm run test:editor
+        run: npm run test:editor
       - name: Test the real editor and server (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: |
-          $env:EQIORA_SERVER = Join-Path $pwd 'server/eqiora-language-server.exe'
-          npm run test:editor
+        run: npm run test:editor
       - name: Package native extension
         run: npx vsce package --target ${{ matrix.target }} --out eqiora-${{ matrix.target }}.vsix
       - name: Check package and record checksum
