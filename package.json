@@ -1,0 +1,310 @@
+{
+  "name": "eqiora",
+  "displayName": "Eqiora",
+  "description": "Write physical models, inspect equations, and explore connections with Eqiora.",
+  "version": "0.1.0",
+  "publisher": "nkiyohara",
+  "license": "Apache-2.0",
+  "icon": "media/icon.png",
+  "homepage": "https://eqiora.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nkiyohara/eqiora-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nkiyohara/eqiora-vscode/issues"
+  },
+  "engines": {
+    "vscode": "^1.100.0",
+    "node": ">=22"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization",
+    "Education"
+  ],
+  "keywords": [
+    "eqiora",
+    "equations",
+    "physics",
+    "simulation",
+    "math",
+    "language server"
+  ],
+  "galleryBanner": {
+    "color": "#17417e",
+    "theme": "dark"
+  },
+  "main": "./dist/extension.cjs",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onLanguage:eqiora"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Syntax highlighting works. Trust the workspace to start the language server and inspect models.",
+      "restrictedConfigurations": [
+        "eqiora.server.path",
+        "eqiora.server.args"
+      ]
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "The native language server needs a local or remote filesystem."
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "eqiora",
+        "aliases": [
+          "Eqiora",
+          "eqiora"
+        ],
+        "extensions": [
+          ".eqi"
+        ],
+        "configuration": "./vendor/syntax/language-configuration.json",
+        "icon": {
+          "light": "./media/file.svg",
+          "dark": "./media/file.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "eqiora",
+        "scopeName": "source.eqiora",
+        "path": "./vendor/syntax/syntaxes/eqiora.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "eqiora",
+        "path": "./vendor/syntax/snippets/eqiora.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "eqiora.restartServer",
+        "title": "Restart Language Server",
+        "category": "Eqiora",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "eqiora.showOutput",
+        "title": "Show Language Server Log",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.selectServer",
+        "title": "Select Language Server",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.preview",
+        "title": "Open Equation Preview",
+        "category": "Eqiora",
+        "icon": "$(symbol-operator)"
+      },
+      {
+        "command": "eqiora.connections",
+        "title": "Inspect Ports and Connections",
+        "category": "Eqiora",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "eqiora.boundaries",
+        "title": "Open Boundary Condition Map",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.modelPlan",
+        "title": "Inspect Model and Numerical Plan",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.attachPlan",
+        "title": "Open Numerical Plan JSON",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.captureBaseline",
+        "title": "Capture Model Comparison Baseline",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.semanticChanges",
+        "title": "Preview Semantic Changes",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.selectModel",
+        "title": "Select Model",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.exportEquations",
+        "title": "Export Equations as LaTeX",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.openGuide",
+        "title": "Open Eqiora Guide",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.openExample",
+        "title": "Open Example Model",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.refresh",
+        "title": "Refresh Model Views",
+        "category": "Eqiora",
+        "icon": "$(refresh)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "eqiora",
+          "title": "Eqiora",
+          "icon": "media/activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "eqiora": [
+        {
+          "id": "eqiora.models",
+          "name": "Model Hierarchy"
+        },
+        {
+          "id": "eqiora.ports",
+          "name": "Ports and Connections"
+        },
+        {
+          "id": "eqiora.boundaryTree",
+          "name": "Boundaries and Supports"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "eqiora.models",
+        "contents": "Open an .eqi file to explore its declarations.\n[Open example](command:eqiora.openExample)\n[Read the guide](command:eqiora.openGuide)",
+        "when": "!eqiora.hasDocument"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "eqiora.preview",
+          "when": "resourceLangId == eqiora",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "eqiora.refresh",
+          "when": "view == eqiora.models",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Eqiora",
+      "properties": {
+        "eqiora.server.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "Language server executable. Empty uses a bundled server, then eqiora-language-server on PATH. Runs on the workspace host."
+        },
+        "eqiora.server.args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "scope": "machine-overridable",
+          "description": "Arguments passed directly to the server; no shell is used."
+        },
+        "eqiora.server.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable diagnostics, navigation and rich model analysis.",
+          "scope": "resource"
+        },
+        "eqiora.preview.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rich equation and model views.",
+          "scope": "resource"
+        },
+        "eqiora.preview.updateDelay": {
+          "type": "number",
+          "default": 400,
+          "minimum": 100,
+          "maximum": 5000,
+          "description": "Delay in milliseconds before refreshing rich views after editing."
+        },
+        "eqiora.preview.followCursor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight equations related to the selected declaration."
+        },
+        "eqiora.preview.fontSize": {
+          "type": "number",
+          "default": 18,
+          "minimum": 12,
+          "maximum": 36,
+          "description": "Equation font size in pixels."
+        },
+        "eqiora.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace language server communication to the output channel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit && prettier --check .",
+    "format": "prettier --write .",
+    "test": "tsx --test test/*.test.ts",
+    "test:editor": "node scripts/test-editor.mjs",
+    "vscode:prepublish": "npm run build",
+    "package": "vsce package --out eqiora.vsix",
+    "verify": "npm run check && npm test && npm run build",
+    "sync:upstream": "node scripts/sync-upstream.mjs",
+    "test:views": "playwright test"
+  },
+  "dependencies": {
+    "katex": "0.18.7",
+    "vscode-languageclient": "10.1.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/katex": "^0.16.7",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "1.100.0",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.0.0",
+    "esbuild": "0.28.2",
+    "ovsx": "1.2.0",
+    "prettier": "^3.6.0",
+    "tsx": "^4.20.0",
+    "typescript": "7.0.2"
+  }
+}

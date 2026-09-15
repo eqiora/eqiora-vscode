@@ -1,0 +1,18 @@
+:root { color-scheme: light dark; }
+body { margin: 0; padding: 0 24px 40px; color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family, system-ui); font-size: var(--vscode-font-size, 13px); }
+header { display: flex; gap: 12px; align-items: center; padding: 24px 0 18px; } header strong { display: block; font-size: 20px; } header span { display: block; margin-top: 4px; opacity: .7; } header > button { margin-left: auto; }
+nav { display: flex; gap: 6px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--vscode-panel-border, #8885); }
+button { font: inherit; color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground, #8882); border: 1px solid transparent; border-radius: 5px; padding: 7px 11px; cursor: pointer; }
+button:hover { background: var(--vscode-button-secondaryHoverBackground, #8884); } button:focus-visible, summary:focus-visible { outline: 2px solid var(--vscode-focusBorder, #6af); outline-offset: 2px; }
+nav button[aria-current=true] { color: var(--vscode-button-foreground, white); background: var(--vscode-button-background, #17417e); }
+h2 { margin: 0 0 8px; font-size: 21px; font-weight: 550; } h3 { font-size: 14px; margin: 0 0 12px; } p { line-height: 1.6; }
+.section { margin: 26px 0; } .muted { color: var(--vscode-descriptionForeground); } .notice { padding: 12px 14px; background: var(--vscode-textBlockQuote-background, #8882); border-left: 3px solid var(--vscode-textLink-foreground, #6af); }
+.toolbar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 20px 0; }
+.equation, .entity { border: 1px solid var(--vscode-panel-border, #8885); border-radius: 8px; padding: 20px; margin: 14px 0; background: var(--vscode-sideBar-background, transparent); }
+.equation.selected { outline: 2px solid var(--vscode-focusBorder, #6af); }
+.math { overflow-x: auto; padding: 8px 0 18px; } .quantities { display: flex; flex-wrap: wrap; gap: 8px; }.quantities button { color: var(--vscode-textLink-foreground, #6af); padding: 4px 8px; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--vscode-editor-font-family, monospace); line-height: 1.6; }
+details { margin-top: 16px; } summary { cursor: pointer; color: var(--vscode-descriptionForeground); } li { padding: 5px 0; }
+.counts { display: flex; flex-wrap: wrap; gap: 12px; } .counts > div { border: 1px solid var(--vscode-panel-border, #8885); padding: 12px; border-radius: 6px; }
+.comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-top: 20px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }

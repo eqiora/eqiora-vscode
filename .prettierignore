@@ -1,0 +1,11 @@
+node_modules
+dist
+vendor
+package-lock.json
+media
+server
+.vscode-test
+*.vsix
+upstream
+test-results
+playwright-report

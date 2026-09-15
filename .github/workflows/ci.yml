@@ -1,0 +1,84 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  package:
+    name: Package (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x64
+          - os: windows-latest
+            target: win32-x64
+          - os: macos-latest
+            target: darwin-arm64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - name: Test equation views
+        if: runner.os == 'Linux'
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:views
+      - name: Read pinned server revision
+        id: upstream
+        shell: bash
+        run: node -e 'const fs=require("fs"); const u=require("./upstream.json"); if(!/^[0-9a-f]{40}$/.test(u.revision)||u.repository!=="nkiyohara/eqiora")throw Error("Invalid upstream pin"); fs.appendFileSync(process.env.GITHUB_OUTPUT,"revision="+u.revision+"\n");'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: nkiyohara/eqiora
+          ref: ${{ steps.upstream.outputs.revision }}
+          path: upstream
+          persist-credentials: false
+      - name: Set home-backed build scratch
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.cache/eqiora-tmp"
+          echo "TMPDIR=$HOME/.cache/eqiora-tmp" >> "$GITHUB_ENV"
+      - run: rustup toolchain install stable --profile minimal
+      - run: node scripts/build-server.mjs
+      - name: Test the real editor and server (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: EQIORA_SERVER="$PWD/server/eqiora-language-server" xvfb-run -a npm run test:editor
+      - name: Test the real editor and server (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: EQIORA_SERVER="$PWD/server/eqiora-language-server" npm run test:editor
+      - name: Test the real editor and server (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:EQIORA_SERVER = Join-Path $pwd 'server/eqiora-language-server.exe'
+          npm run test:editor
+      - name: Package native extension
+        run: npx vsce package --target ${{ matrix.target }} --out eqiora-${{ matrix.target }}.vsix
+      - name: Check package and record checksum
+        shell: bash
+        run: node scripts/check-vsix.mjs eqiora-${{ matrix.target }}.vsix > eqiora-${{ matrix.target }}.sha256
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: eqiora-${{ matrix.target }}
+          path: |
+            eqiora-${{ matrix.target }}.vsix
+            eqiora-${{ matrix.target }}.sha256
+          if-no-files-found: error
