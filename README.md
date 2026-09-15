@@ -6,6 +6,8 @@ The official Eqiora extension connects `.eqi` source to the mathematics it descr
 Eqiora owns parsing, units, physical meaning and numerical execution; this extension
 connects its language server to VS Code and renders its inspection results.
 
+![Equation preview of the included decay model](media/preview.png)
+
 ## Features
 
 - **Editing:** canonical highlighting, snippets, brackets, comments, indentation,
