@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Use the Eqiora Marketplace publisher and organization repository URLs.
+- Publish tested native packages to Marketplace automatically from Release CI.
+
 ## 0.1.0
 
 - Official Eqiora language client, canonical syntax bundle and brand assets.

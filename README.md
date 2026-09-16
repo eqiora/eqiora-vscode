@@ -1,4 +1,4 @@
-<p align="center"><img src="https://raw.githubusercontent.com/nkiyohara/eqiora-vscode/main/media/icon.png" width="96" alt="Eqiora"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/eqiora/eqiora-vscode/main/media/icon.png" width="96" alt="Eqiora"></p>
 <h1 align="center">Eqiora for Visual Studio Code</h1>
 <p align="center">Write the model. Read the equations. Explore the physics.</p>
 
@@ -30,10 +30,14 @@ maintain another parser, unit system or scientific evaluator.
 ## Install
 
 Download the `.vsix` matching your workspace host from
-[GitHub Releases](https://github.com/nkiyohara/eqiora-vscode/releases), then choose
+[GitHub Releases](https://github.com/eqiora/eqiora-vscode/releases), then choose
 **Extensions → … → Install from VSIX**. Release packages include the matching
-language server. Marketplace and Open VSX listings are not yet published.
+language server. See [publishing](docs/publishing.md) for Marketplace and Open VSX
+publication.
 Native packages are available for Linux x64, Windows x64 and macOS Apple Silicon.
+
+If you installed the initial `nkiyohara.eqiora` VSIX, uninstall it before installing
+`eqiora.eqiora` to avoid running two language clients.
 
 For source builds without a bundled server, install the server from the exact
 Eqiora revision in [upstream.json](upstream.json), or use **Eqiora: Select Language
@@ -67,7 +71,7 @@ completion beyond the shipped snippets and existing server capabilities.
 
 ## Ownership
 
-- [Eqiora](https://github.com/nkiyohara/eqiora): language, compiler, mathematical
+- [Eqiora](https://github.com/eqiora/eqiora): language, compiler, mathematical
   rendering, language server and canonical syntax bundle.
 - This repository: editor integration, settings, rich views, icons, packaging and
   independent extension releases.

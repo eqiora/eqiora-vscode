@@ -42,10 +42,10 @@ jobs:
       - name: Read pinned server revision
         id: upstream
         shell: bash
-        run: node -e 'const fs=require("fs"); const u=require("./upstream.json"); if(!/^[0-9a-f]{40}$/.test(u.revision)||u.repository!=="nkiyohara/eqiora")throw Error("Invalid upstream pin"); fs.appendFileSync(process.env.GITHUB_OUTPUT,"revision="+u.revision+"\n");'
+        run: node -e 'const fs=require("fs"); const u=require("./upstream.json"); if(!/^[0-9a-f]{40}$/.test(u.revision)||u.repository!=="eqiora/eqiora")throw Error("Invalid upstream pin"); fs.appendFileSync(process.env.GITHUB_OUTPUT,"revision="+u.revision+"\n");'
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          repository: nkiyohara/eqiora
+          repository: eqiora/eqiora
           ref: ${{ steps.upstream.outputs.revision }}
           path: upstream
           persist-credentials: false

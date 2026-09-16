@@ -1,14 +1,9 @@
-name: Publish registries
+name: Publish Open VSX
 on:
   workflow_dispatch:
     inputs:
       tag:
         description: Tested GitHub release tag
-        required: true
-      registry:
-        description: Publication destination
-        type: choice
-        options: [open-vsx, marketplace]
         required: true
 permissions:
   contents: read
@@ -37,16 +32,8 @@ jobs:
           cd release-assets
           sha256sum -c ./*.sha256
       - name: Publish to Open VSX
-        if: inputs.registry == 'open-vsx'
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: |
           test -n "$OVSX_PAT" || { echo 'Configure the publishing environment OVSX_PAT secret.'; exit 1; }
           for package in release-assets/*.vsix; do npx ovsx publish "$package"; done
-      - name: Publish to Marketplace
-        if: inputs.registry == 'marketplace'
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: |
-          test -n "$VSCE_PAT" || { echo 'Configure publishing authentication; see docs/publishing.md for Entra ID migration.'; exit 1; }
-          npx vsce publish --packagePath release-assets/*.vsix

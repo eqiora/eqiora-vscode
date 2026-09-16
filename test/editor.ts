@@ -29,7 +29,7 @@ export async function run(): Promise<void> {
   const extension = vscode.extensions.getExtension<{
     refresh: () => Promise<void>;
     inspection: () => Inspection | undefined;
-  }>("nkiyohara.eqiora");
+  }>("eqiora.eqiora");
   assert.ok(extension);
   const api = await extension.activate();
   await api.refresh();
