@@ -32,7 +32,8 @@ maintain another parser, unit system or scientific evaluator.
 Download the `.vsix` matching your workspace host from
 [GitHub Releases](https://github.com/eqiora/eqiora-vscode/releases), then choose
 **Extensions → … → Install from VSIX**. Release packages include the matching
-language server. Marketplace and Open VSX listings are not yet published.
+language server. See [publishing](docs/publishing.md) for Marketplace and Open VSX
+publication.
 Native packages are available for Linux x64, Windows x64 and macOS Apple Silicon.
 
 If you installed the initial `nkiyohara.eqiora` VSIX, uninstall it before installing
