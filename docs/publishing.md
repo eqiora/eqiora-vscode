@@ -1,34 +1,68 @@
 # Publishing
 
-## GitHub releases
+## Release to GitHub and Visual Studio Marketplace
 
-CI builds and tests the extension with the exact server source in `upstream.json`
-on each supported OS, then uploads the VSIX. Use the **Release** workflow from
-protected `main` to publish those tested packages and their SHA-256 checksums.
-The version comes from `package.json`; the tag identifies the same source commit.
+The Marketplace publisher is `eqiora`; the extension ID is `eqiora.eqiora`.
 
-## Visual Studio Marketplace
+1. Update the version in `package.json` and `package-lock.json`, and the changelog.
+2. Merge the change after CI passes.
+3. Run **Release** on protected `main` in GitHub Actions.
 
-Create a Marketplace publisher and ensure `package.json` uses its identifier.
-Publisher registration and authentication are account-owner setup. The initial
-`nkiyohara` identifier is a packaging choice, not a claim that it has been registered.
+Release builds and tests native packages on Linux x64, Windows x64 and macOS
+Apple Silicon using the exact server revision in `upstream.json`. It publishes
+those packages and their SHA-256 checksums to GitHub Releases, then uploads the
+same tested artifacts to Marketplace. Publishing uses the `publishing`
+environment, which permits protected branches only.
 
-A release VSIX can be uploaded through the Marketplace publisher management page.
-For automation, use the official Microsoft Entra ID authentication flow with
-`vsce publish --azure-credential`. Azure DevOps global PATs are scheduled for
-retirement on December 1, 2026; do not build a new permanent dependency on them.
-The optional **Publish registries** workflow accepts an already configured
-`VSCE_PAT` while that method is supported, and `OVSX_PAT` for Open VSX. Both are
-GitHub environment secrets, never repository files.
+The Marketplace job verifies checksums and packaged publisher, name and version.
+Authentication or upload failures fail the workflow. A GitHub release alone does
+not mean Marketplace publication succeeded. After fixing a publication failure,
+use **Re-run failed jobs** on the original Release run. Already uploaded versions
+for an individual platform are skipped; missing platforms are still published.
+
+## One-time Marketplace authentication
+
+### Personal Access Token (currently supported)
+
+With the Microsoft account that manages the `eqiora` publisher:
+
+1. Sign in to Azure DevOps and create an organization if needed.
+2. Open **User settings → Personal access tokens → New Token**.
+3. Select **All accessible organizations** and the custom scope
+   **Marketplace → Manage** (under **Show all scopes**).
+4. Store the token in this repository's **Settings → Environments → publishing →
+   Environment secrets**, with the name `VSCE_PAT`.
+
+Do not put the token in repository files or release inputs. Publication defaults
+to this authentication method. Global Azure DevOps PATs retire on December 1,
+2026; migrate authentication before that date and renew any earlier-expiring token.
+
+### Trusted publishing (when available for the publisher)
+
+The pinned `vsce` supports GitHub Actions OIDC. Once Marketplace allows a trusted
+publishing policy for this publisher, authorize these exact values:
+
+- Repository owner: `eqiora`
+- Repository: `eqiora-vscode`
+- Workflow: `.github/workflows/release.yml` (`release.yml` if the form asks only
+  for a filename)
+- Environment: `publishing`
+- Branch/ref, if supported: `refs/heads/main`
+
+Then set the `publishing` environment variable `MARKETPLACE_AUTH` to `oidc`.
+The job uses `vsce publish --oidc` with `id-token: write`; it does not fall back
+to a PAT after an OIDC error. Remove `VSCE_PAT` after successful OIDC publication.
+CLI support does not establish that the Marketplace policy UI is available to
+this publisher. If it is unavailable, follow Microsoft's supported Entra ID
+publishing setup before PAT retirement.
 
 ## Open VSX
 
-Create the Eclipse account, accept the publisher agreement, register the namespace
-matching `publisher`, and configure publication credentials. Namespace registration
-does not automatically establish verified ownership.
-
-Publication is separate from package construction. Missing credentials cause an
-explicit workflow failure, not a successful-looking skipped publication.
+Open VSX publication remains separate. Create the Eclipse account, accept the
+publisher agreement, register the `eqiora` namespace and configure `OVSX_PAT` in
+the `publishing` environment. Run **Publish Open VSX** with a tested GitHub release
+tag. Namespace registration does not automatically establish verified ownership.
 
 - [VS Code publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
+- [vsce trusted publishing](https://github.com/microsoft/vscode-vsce#trusted-publishing)
 - [Open VSX publishing guide](https://github.com/eclipse-openvsx/openvsx/wiki/Publishing-Extensions)

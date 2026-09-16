@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: extension-release
+  cancel-in-progress: false
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -39,3 +42,47 @@ jobs:
           for directory in release-assets/eqiora-*; do (cd "$directory" && sha256sum -c ./*.sha256); done
           version=$(node -p 'require("./package.json").version')
           gh release create "v$version" --target "$RELEASE_COMMIT" --title "Eqiora for VS Code $version" --notes-file CHANGELOG.md release-assets/eqiora-*/*.vsix release-assets/eqiora-*/*.sha256
+  marketplace:
+    needs: release
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: publishing
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Download this run's tested packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: gh run download "$RUN_ID" --dir release-assets
+      - name: Verify release packages
+        run: |
+          for directory in release-assets/eqiora-*; do (cd "$directory" && sha256sum -c ./*.sha256); done
+          for package in release-assets/eqiora-*/*.vsix; do node scripts/check-vsix.mjs "$package"; done
+      - name: Publish to Marketplace
+        env:
+          MARKETPLACE_AUTH: ${{ vars.MARKETPLACE_AUTH || 'pat' }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          case "$MARKETPLACE_AUTH" in
+            pat)
+              test -n "$VSCE_PAT" || { echo 'Set the publishing environment secret VSCE_PAT.'; exit 1; }
+              npx vsce publish --skip-duplicate --packagePath release-assets/eqiora-*/*.vsix
+              ;;
+            oidc)
+              unset VSCE_PAT
+              npx vsce publish --oidc --skip-duplicate --packagePath release-assets/eqiora-*/*.vsix
+              ;;
+            *) echo 'MARKETPLACE_AUTH must be pat or oidc.'; exit 1 ;;
+          esac
