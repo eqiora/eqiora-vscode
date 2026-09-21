@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Complete keywords/templates, current-scope names, import paths, public/exposed
+  members and remaining named arguments, including incomplete source (#7–#10).
+- Keep canonical snippet placeholders and Tab navigation without duplicate keywords.
+- Discard cancelled or superseded completion responses.
+
 - Update the language server for documented standard-function hover, local
   completion and argument help, including authored declaration and parameter comments.
 - Explain common language keywords and mathematical types in hover and completion.

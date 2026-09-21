@@ -26,8 +26,20 @@ are not yet exhaustively covered.
 Place `///` comments immediately before your declarations and their individual
 signature entries to show their explanations in hover, local completion and call
 help. Named arguments highlight their matching parameter even when reordered.
-Local suggestions follow lexical scope; inferred-type filtering and automatic
-import suggestions are not yet provided. These features require the updated
+Use **Trigger Suggest** (Ctrl+Space, or your platform's assigned shortcut) at any
+point, including while a declaration or call is incomplete. Local suggestions
+follow lexical scope; `import` completes available canonical module segments,
+aliases expose public declarations, and instances expose their interface members.
+Inside a call, remaining argument names show their type, documentation and
+required/defaulted status. Selecting a name inserts `name = ` without duplicating
+an existing equals sign. Expected-type/unit ranking and automatic imports remain
+unavailable. Missing dependencies are not fetched or installed by completion.
+
+The canonical `model`, `component`, `connector` and `relation` templates expand
+with editable placeholders; Tab moves to the next placeholder. Set
+`"editor.tabCompletion": "on"` to expand their prefixes with Tab, or choose a
+template from Trigger Suggest. Native templates remain available with older
+servers. When templates are visible, their duplicate LSP keywords are suppressed. These features require the updated
 server; older bundled servers retain their existing editing features. During
 development, select the newly built server with `eqiora.server.path`.
 
