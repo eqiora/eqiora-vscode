@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Update the language server for documented standard-function hover, local
+  completion and argument help, including authored declaration and parameter comments.
+- Test documentation through the real VS Code hover, completion and signature providers.
+
 ## 0.1.1
 
 - Use the Eqiora Marketplace publisher and organization repository URLs.

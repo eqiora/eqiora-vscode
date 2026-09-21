@@ -45,6 +45,67 @@ export async function run(): Promise<void> {
   assert.ok(symbols?.some((symbol) => symbol.name === "Decay"));
   await vscode.commands.executeCommand("eqiora.preview");
   await vscode.commands.executeCommand("eqiora.captureBaseline");
+  const documentationSource = `/// Scale a value.
+operator scale(
+  /// Input value.
+  input x: 1,
+  /// Scale factor.
+  input factor: 1
+): 1 = x * factor;
+model Documented() {
+  relation law { scale(factor = 2, x = math.sqrt(4)) = 4; }
+}
+`;
+  const documentationEdit = new vscode.WorkspaceEdit();
+  documentationEdit.replace(
+    doc.uri,
+    new vscode.Range(0, 0, doc.lineCount, 0),
+    documentationSource,
+  );
+  await vscode.workspace.applyEdit(documentationEdit);
+  const positionOf = (text: string) =>
+    doc.positionAt(documentationSource.indexOf(text));
+  const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
+    "vscode.executeHoverProvider",
+    doc.uri,
+    positionOf("sqrt(4)"),
+  );
+  assert.ok(
+    hovers?.some((hover) =>
+      hover.contents.some(
+        (content) =>
+          typeof content !== "string" &&
+          content.value.includes("Real square root"),
+      ),
+    ),
+    "standard functions expose their documentation in the editor",
+  );
+  const completions =
+    await vscode.commands.executeCommand<vscode.CompletionList>(
+      "vscode.executeCompletionItemProvider",
+      doc.uri,
+      positionOf("sqrt(4)"),
+    );
+  assert.ok(
+    completions?.items.some(
+      (item) => item.label === "math.sqrt" && item.documentation,
+    ),
+    "completion carries standard-function documentation",
+  );
+  const help = await vscode.commands.executeCommand<vscode.SignatureHelp>(
+    "vscode.executeSignatureHelpProvider",
+    doc.uri,
+    positionOf("math.sqrt(4)"),
+  );
+  assert.equal(help?.activeParameter, 0, "named arguments select their formal");
+  assert.ok(help?.signatures[0].label.includes("operator scale("));
+  const parameterDoc = help?.signatures[0].parameters[0].documentation;
+  assert.ok(
+    (typeof parameterDoc === "string"
+      ? parameterDoc
+      : parameterDoc?.value
+    )?.includes("Input value"),
+  );
   const edit = new vscode.WorkspaceEdit();
   edit.replace(
     doc.uri,
