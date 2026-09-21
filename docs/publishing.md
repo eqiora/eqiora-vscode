@@ -3,6 +3,9 @@
 ## Release to GitHub and Visual Studio Marketplace
 
 The Marketplace publisher is `eqiora`; the extension ID is `eqiora.eqiora`.
+The extension is published on both the
+[Marketplace](https://marketplace.visualstudio.com/items?itemName=eqiora.eqiora)
+and [Open VSX](https://open-vsx.org/extension/eqiora/eqiora).
 
 1. Update the version in `package.json` and `package-lock.json`, and the changelog.
 2. Merge the change after CI passes.
@@ -58,10 +61,12 @@ publishing setup before PAT retirement.
 
 ## Open VSX
 
-Open VSX publication remains separate. Create the Eclipse account, accept the
-publisher agreement, register the `eqiora` namespace and configure `OVSX_PAT` in
-the `publishing` environment. Run **Publish Open VSX** with a tested GitHub release
-tag. Namespace registration does not automatically establish verified ownership.
+Open VSX publication uses the registered `eqiora` namespace, whose
+[ownership is verified](https://github.com/EclipseFdn/open-vsx.org/issues/13277).
+Maintain `OVSX_PAT` in the `publishing` environment and run **Publish Open VSX**
+with a tested GitHub release tag. This is separate from Marketplace publication;
+check both listings after a release. Open VSX namespace verification does not
+establish Microsoft's separate verified-domain badge.
 
 - [VS Code publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
 - [vsce trusted publishing](https://github.com/microsoft/vscode-vsce#trusted-publishing)
