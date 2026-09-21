@@ -156,7 +156,7 @@ test("Plan viewer preserves native binding, numerical controls and unsupported r
     solverBackend: "native-provider",
     solverBackendVersion: "1.2.3",
     metadata: {
-      schema: "eqiora.resolved-common-plan.v5",
+      schema: "eqiora.resolved-common-plan/v5",
       temporal: { relative_tolerance: 0.000001 },
       label: '<img src=x onerror="window.hacked=true">',
     },
