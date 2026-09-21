@@ -32,8 +32,25 @@ follow lexical scope; `import` completes available canonical module segments,
 aliases expose public declarations, and instances expose their interface members.
 Inside a call, remaining argument names show their type, documentation and
 required/defaulted status. Selecting a name inserts `name = ` without duplicating
-an existing equals sign. Expected-type/unit ranking and automatic imports remain
-unavailable. Missing dependencies are not fetched or installed by completion.
+an existing equals sign. Automatic imports remain unavailable. Completion performs
+no network access and runs no solver; missing dependencies are not fetched or
+installed.
+
+With an updated development server, simple name/path references in Model parameter
+initializers, named Component parameter bindings and scalar connection endpoints
+are ranked by the compiler: compatible candidates first, unknown candidates next,
+and incompatible candidates last. Descriptions explain the available type,
+physical dimension, shape, nominal identity or endpoint role. Equal dimensions do
+not make distinct nominal types or physical Connectors interchangeable. Selecting
+a suggestion inserts its name, without adding conversions or physical adapters.
+
+Connection ranking currently covers continuous non-spatial signals and scalar
+physical endpoints. Clock/support identities, unresolved dependent types,
+arithmetic operands, Component bodies and incomplete analysis retain ordinary
+name completion without claiming compatibility. Ranking is advisory and does not
+establish the validity of every connection in a Model. This ranking is not in the
+published server bundle; select an updated development server with
+`eqiora.server.path`.
 
 The canonical `model`, `component`, `connector` and `relation` templates expand
 with editable placeholders; Tab moves to the next placeholder. Set

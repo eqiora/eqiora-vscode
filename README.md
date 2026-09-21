@@ -76,9 +76,15 @@ successful preview. Boundaries are a topological view, not a CAD viewport.
 
 Structural comparison uses the compiler's supported vocabulary and resource bounds;
 it does not promise identical solver outputs. This extension does not run models,
-infer solvers, display complex or modal Results, implement rename or rank completion
-by inferred type/unit. Completion covers keywords/templates, current-scope names,
-canonical imports, public and exposed members, and remaining named arguments.
+infer solvers, display complex or modal Results or implement rename. Completion
+covers keywords/templates, current-scope names, canonical imports, public and
+exposed members, and remaining named arguments. Updated development servers also
+rank simple name/path references in Model parameter initializers, named Component
+parameter bindings and scalar connection endpoints by compiler-owned compatibility.
+Compatible candidates come before unknown and incompatible candidates; unresolved
+contexts retain ordinary name completion. See the [guide](docs/guide.md) for the
+supported type/unit and endpoint checks. This ranking is not in the published
+server bundle; select an updated development server with `eqiora.server.path`.
 
 ## Ownership
 
