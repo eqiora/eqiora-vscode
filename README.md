@@ -66,8 +66,9 @@ successful preview. Boundaries are a topological view, not a CAD viewport.
 
 Structural comparison uses the compiler's supported vocabulary and resource bounds;
 it does not promise identical solver outputs. This extension does not run models,
-infer solvers, validate arbitrary Plan JSON, implement rename or provide semantic
-completion beyond the shipped snippets and existing server capabilities.
+infer solvers, validate arbitrary Plan JSON, implement rename or rank completion
+by inferred type/unit. Completion covers keywords/templates, current-scope names,
+canonical imports, public and exposed members, and remaining named arguments.
 
 ## Ownership
 

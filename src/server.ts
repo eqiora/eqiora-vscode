@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import {
   LanguageClient,
   type LanguageClientOptions,
@@ -10,8 +10,19 @@ import { inspectResponse, type Inspection } from "./model";
 
 export class Servers implements vscode.Disposable {
   private clients = new Map<string, Promise<LanguageClient>>();
+  private readonly templatePrefixes: Set<string>;
   readonly output = vscode.window.createOutputChannel("Eqiora", { log: true });
-  constructor(private context: vscode.ExtensionContext) {}
+  constructor(private context: vscode.ExtensionContext) {
+    const templates = JSON.parse(
+      readFileSync(
+        context.asAbsolutePath("vendor/syntax/snippets/eqiora.json"),
+        "utf8",
+      ),
+    ) as Record<string, { prefix: string | string[] }>;
+    this.templatePrefixes = new Set(
+      Object.values(templates).flatMap((t) => t.prefix),
+    );
+  }
   async client(document: vscode.TextDocument): Promise<LanguageClient> {
     if (!vscode.workspace.isTrusted)
       throw new Error("Trust this workspace to start Eqiora.");
@@ -75,6 +86,38 @@ export class Servers implements vscode.Disposable {
       outputChannel: this.output,
       initializationOptions: { eqioraInspection: 1 },
       middleware: {
+        provideCompletionItem: async (
+          document,
+          position,
+          context,
+          token,
+          next,
+        ) => {
+          const version = document.version;
+          const result = await next(document, position, context, token);
+          if (token.isCancellationRequested || document.version !== version)
+            return undefined;
+          // Native snippets retain their placeholders and Tab navigation, even
+          // with an older server. Suppress only duplicate keyword candidates.
+          const editor = vscode.workspace.getConfiguration(
+            "editor",
+            document.uri,
+          );
+          if (
+            !result ||
+            editor.get("snippetSuggestions") === "none" ||
+            editor.get("suggest.showSnippets") === false
+          )
+            return result;
+          const keep = (item: vscode.CompletionItem) =>
+            item.kind !== vscode.CompletionItemKind.Keyword ||
+            !this.templatePrefixes.has(
+              typeof item.label === "string" ? item.label : item.label.label,
+            );
+          if (Array.isArray(result)) return result.filter(keep);
+          result.items = result.items.filter(keep);
+          return result;
+        },
         provideHover: async (document, position, token, next) => {
           const hover = await next(document, position, token);
           if (!hover) return hover;

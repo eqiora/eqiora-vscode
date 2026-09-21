@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { completionChecks } from "./completion-editor";
 import type { Inspection } from "../src/model";
 export async function run(): Promise<void> {
   const executable = process.env.EQIORA_SERVER;
@@ -121,6 +122,7 @@ model Documented() {
       : parameterDoc?.value
     )?.includes("Input value"),
   );
+  await completionChecks(doc);
   const edit = new vscode.WorkspaceEdit();
   edit.replace(
     doc.uri,
