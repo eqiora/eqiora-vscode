@@ -13,6 +13,24 @@ definition. Hovering code shows the language server's declaration documentation 
 the language reference and mathematical textbook.
 Use **Eqiora: Open Eqiora Guide** to open the linked textbook.
 
+With a language server that advertises completion and signature help, type `math.`
+to see documented standard functions and constants. Hover `math.sqrt`, for example,
+to read its unit and domain constraints. Opening a call or typing a comma shows
+its arguments; **Trigger Parameter Hints** opens this help manually.
+Language keywords such as `model`, `relation`, `parameter` and `initial`, and types
+such as `array`, `complex` and `integer`, also show their syntax and meaning in
+hover and completion. For example, `relation` explains simultaneous equations and
+`array` distinguishes channel axes from spatial axes. Specialized grammar children
+are not yet exhaustively covered.
+
+Place `///` comments immediately before your declarations and their individual
+signature entries to show their explanations in hover, local completion and call
+help. Named arguments highlight their matching parameter even when reordered.
+Local suggestions follow lexical scope; inferred-type filtering and automatic
+import suggestions are not yet provided. These features require the updated
+server; older bundled servers retain their existing editing features. During
+development, select the newly built server with `eqiora.server.path`.
+
 ## Commands
 
 All commands are available from the Command Palette under **Eqiora**:

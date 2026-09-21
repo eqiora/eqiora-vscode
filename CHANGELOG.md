@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Update the language server for documented standard-function hover, local
+  completion and argument help, including authored declaration and parameter comments.
+- Explain common language keywords and mathematical types in hover and completion.
+- Test documentation through the real VS Code hover, completion and signature providers.
+
 ## 0.1.1
 
 - Use the Eqiora Marketplace publisher and organization repository URLs.

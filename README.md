@@ -11,8 +11,8 @@ connects its language server to VS Code and renders its inspection results.
 ## Features
 
 - **Editing:** canonical highlighting, snippets, brackets, comments, indentation,
-  diagnostics, formatting, hover with reference/textbook links, definitions, references,
-  symbols and folding.
+  diagnostics, formatting, documented completion and signature help, hover with
+  reference/textbook links, definitions, references, symbols and folding.
 - **Equation Preview:** live LaTeX display with accessible MathML/plain text,
   source navigation, cursor highlighting, model selection and LaTeX export.
 - **Model Hierarchy:** nested declarations with navigation to source.
