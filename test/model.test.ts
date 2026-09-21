@@ -59,3 +59,10 @@ test("incompatible server payloads reject instead of displaying an invented mode
   );
   assert.equal(inspectResponse(current), current);
 });
+
+test("malformed native Plan projections reject without deriving replacement values", () => {
+  assert.throws(
+    () => inspectResponse({ ...current, plan: { identity: "unvalidated" } }),
+    /Plan inspection/,
+  );
+});

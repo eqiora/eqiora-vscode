@@ -55,7 +55,7 @@ All commands are available from the Command Palette under **Eqiora**:
 | Inspect Ports and Connections     | Inspect compiler-owned connections and roles          |
 | Open Boundary Condition Map       | Inspect support and boundary topology                 |
 | Inspect Model and Numerical Plan  | Distinguish physics from numerical choices            |
-| Open Numerical Plan JSON          | Display an existing JSON file, up to 2 MiB            |
+| Open Numerical Plan               | Validate an existing `.eqplan` artifact, up to 2 MiB  |
 | Capture Model Comparison Baseline | Capture the compiler's structural fingerprint         |
 | Preview Semantic Changes          | Compare the selected model with its captured baseline |
 | Select Language Server            | Set the executable on the workspace host              |
@@ -66,8 +66,23 @@ All commands are available from the Command Palette under **Eqiora**:
 | Open Eqiora Guide                 | Open the mathematical modeling textbook               |
 
 The baseline is kept in memory for the current extension session. It applies to one
-exact document URI and selected model. A Plan file is a separately opened reading
-aid, not evidence that a Plan belongs to the current model.
+exact document URI and selected model.
+
+Save a resolved Python Plan with `plan.write("model.eqplan")`, then open the file
+in the Model / Plan view. A compatible server validates the exact artifact and
+shows its Plan identity, Model digest, backend version and accepted controls.
+The view reports whether its Model digest exactly matches the selected compiled
+Model; a different digest remains explicitly unbound. Equivalent source compiled
+in a different namespace, with different bindings or geometry, can have a
+different exact identity. Editing or switching the selected Model requests a new
+comparison. No numerical solve is performed.
+
+This requires `eqioraPlanInspection: 1`, which the currently bundled server does
+not advertise. Use a compatible development server through `eqiora.server.path`.
+Malformed, noncanonical, incompatible-provider and oversized artifacts are
+rejected by the native owner. The renderer does not infer numerical settings or
+complex Result quantities. Complex and modal Result projections await the native
+typed Result API, including undefined phase at zero magnitude.
 
 ## Settings
 
