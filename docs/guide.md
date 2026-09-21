@@ -17,6 +17,11 @@ With a language server that advertises completion and signature help, type `math
 to see documented standard functions and constants. Hover `math.sqrt`, for example,
 to read its unit and domain constraints. Opening a call or typing a comma shows
 its arguments; **Trigger Parameter Hints** opens this help manually.
+Language keywords such as `model`, `relation`, `parameter` and `initial`, and types
+such as `array`, `complex` and `integer`, also show their syntax and meaning in
+hover and completion. For example, `relation` explains simultaneous equations and
+`array` distinguishes channel axes from spatial axes. Specialized grammar children
+are not yet exhaustively covered.
 
 Place `///` comments immediately before your declarations and their individual
 signature entries to show their explanations in hover, local completion and call

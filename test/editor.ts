@@ -80,6 +80,21 @@ model Documented() {
     ),
     "standard functions expose their documentation in the editor",
   );
+  const keywordHovers = await vscode.commands.executeCommand<vscode.Hover[]>(
+    "vscode.executeHoverProvider",
+    doc.uri,
+    positionOf("relation law"),
+  );
+  assert.ok(
+    keywordHovers?.some((hover) =>
+      hover.contents.some(
+        (content) =>
+          typeof content !== "string" &&
+          content.value.includes("simultaneous mathematical equalities"),
+      ),
+    ),
+    "language keywords explain their meaning in the editor",
+  );
   const completions =
     await vscode.commands.executeCommand<vscode.CompletionList>(
       "vscode.executeCompletionItemProvider",
