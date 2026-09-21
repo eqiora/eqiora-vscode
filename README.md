@@ -29,11 +29,20 @@ maintain another parser, unit system or scientific evaluator.
 
 ## Install
 
-Download the `.vsix` matching your workspace host from
-[GitHub Releases](https://github.com/eqiora/eqiora-vscode/releases), then choose
-**Extensions → … → Install from VSIX**. Release packages include the matching
-language server. See [publishing](docs/publishing.md) for Marketplace and Open VSX
-publication.
+Install **Eqiora** (`eqiora.eqiora`) from the
+[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=eqiora.eqiora)
+or [Open VSX](https://open-vsx.org/extension/eqiora/eqiora).
+In Visual Studio Code, you can also run:
+
+```sh
+code --install-extension eqiora.eqiora
+```
+
+For an offline installation, download the `.vsix` matching your workspace host
+from [GitHub Releases](https://github.com/eqiora/eqiora-vscode/releases), then choose
+**Extensions → … → Install from VSIX**. All three distribution routes carry the
+tested release packages with the matching language server. See
+[publishing](docs/publishing.md) for release maintenance.
 Native packages are available for Linux x64, Windows x64 and macOS Apple Silicon.
 
 If you installed the initial `nkiyohara.eqiora` VSIX, uninstall it before installing
