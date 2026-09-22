@@ -153,15 +153,21 @@ export class Servers implements vscode.Disposable {
     model?: string,
     fingerprint = false,
     token?: vscode.CancellationToken,
+    plan?: string,
   ): Promise<Inspection> {
     const client = await this.client(document);
     const capability = client.initializeResult?.capabilities.experimental as
-      { eqioraInspection?: number } | undefined;
+      { eqioraInspection?: number; eqioraPlanInspection?: number } | undefined;
     if (capability?.eqioraInspection !== 1)
       throw new Error(
         "This server supports basic editing but not rich model views. Install the server revision listed in the extension compatibility guide.",
       );
+    if (plan !== undefined && capability?.eqioraPlanInspection !== 1)
+      throw new Error(
+        "This server cannot validate numerical Plans. Install a server with Plan inspection support.",
+      );
     const params = {
+      plan,
       textDocument: { uri: document.uri.toString() },
       model,
       fingerprint,

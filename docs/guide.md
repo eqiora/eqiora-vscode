@@ -32,8 +32,25 @@ follow lexical scope; `import` completes available canonical module segments,
 aliases expose public declarations, and instances expose their interface members.
 Inside a call, remaining argument names show their type, documentation and
 required/defaulted status. Selecting a name inserts `name = ` without duplicating
-an existing equals sign. Expected-type/unit ranking and automatic imports remain
-unavailable. Missing dependencies are not fetched or installed by completion.
+an existing equals sign. Automatic imports remain unavailable. Completion performs
+no network access and runs no solver; missing dependencies are not fetched or
+installed.
+
+With an updated development server, simple name/path references in Model parameter
+initializers, named Component parameter bindings and scalar connection endpoints
+are ranked by the compiler: compatible candidates first, unknown candidates next,
+and incompatible candidates last. Descriptions explain the available type,
+physical dimension, shape, nominal identity or endpoint role. Equal dimensions do
+not make distinct nominal types or physical Connectors interchangeable. Selecting
+a suggestion inserts its name, without adding conversions or physical adapters.
+
+Connection ranking currently covers continuous non-spatial signals and scalar
+physical endpoints. Clock/support identities, unresolved dependent types,
+arithmetic operands, Component bodies and incomplete analysis retain ordinary
+name completion without claiming compatibility. Ranking is advisory and does not
+establish the validity of every connection in a Model. This ranking is not in the
+published server bundle; select an updated development server with
+`eqiora.server.path`.
 
 The canonical `model`, `component`, `connector` and `relation` templates expand
 with editable placeholders; Tab moves to the next placeholder. Set
@@ -55,7 +72,7 @@ All commands are available from the Command Palette under **Eqiora**:
 | Inspect Ports and Connections     | Inspect compiler-owned connections and roles          |
 | Open Boundary Condition Map       | Inspect support and boundary topology                 |
 | Inspect Model and Numerical Plan  | Distinguish physics from numerical choices            |
-| Open Numerical Plan JSON          | Display an existing JSON file, up to 2 MiB            |
+| Open Numerical Plan               | Validate an existing `.eqplan` artifact, up to 2 MiB  |
 | Capture Model Comparison Baseline | Capture the compiler's structural fingerprint         |
 | Preview Semantic Changes          | Compare the selected model with its captured baseline |
 | Select Language Server            | Set the executable on the workspace host              |
@@ -66,8 +83,23 @@ All commands are available from the Command Palette under **Eqiora**:
 | Open Eqiora Guide                 | Open the mathematical modeling textbook               |
 
 The baseline is kept in memory for the current extension session. It applies to one
-exact document URI and selected model. A Plan file is a separately opened reading
-aid, not evidence that a Plan belongs to the current model.
+exact document URI and selected model.
+
+Save a resolved Python Plan with `plan.write("model.eqplan")`, then open the file
+in the Model / Plan view. A compatible server validates the exact artifact and
+shows its Plan identity, Model digest, backend version and accepted controls.
+The view reports whether its Model digest exactly matches the selected compiled
+Model; a different digest remains explicitly unbound. Equivalent source compiled
+in a different namespace, with different bindings or geometry, can have a
+different exact identity. Editing or switching the selected Model requests a new
+comparison. No numerical solve is performed.
+
+This requires `eqioraPlanInspection: 1`, which the currently bundled server does
+not advertise. Use a compatible development server through `eqiora.server.path`.
+Malformed, noncanonical, incompatible-provider and oversized artifacts are
+rejected by the native owner. The renderer does not infer numerical settings or
+complex Result quantities. Complex and modal Result projections await the native
+typed Result API, including undefined phase at zero magnitude.
 
 ## Settings
 

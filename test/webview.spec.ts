@@ -127,3 +127,72 @@ test("preview renders math, exposes source navigation and keeps untrusted text i
   await expect(page.locator(".katex")).toHaveCount(0);
   await expect(page.getByText("Invalid model")).toBeVisible();
 });
+
+test("Plan viewer preserves native binding, numerical controls and unsupported result state", async ({
+  page,
+}) => {
+  await page.setContent(
+    '<div id="subtitle"></div><button id="refresh">Refresh</button><nav id="tabs"></nav><main id="content"></main>',
+  );
+  await page.evaluate(() => {
+    (
+      window as unknown as { acquireVsCodeApi: () => unknown }
+    ).acquireVsCodeApi = () => ({ postMessage: () => {} });
+  });
+  await page.addScriptTag({
+    content: await readFile("dist/webview.js", "utf8"),
+  });
+  const planState = structuredClone(state);
+  planState.page = "plan";
+  planState.plan = { name: "decay.eqplan" };
+  planState.inspection!.plan = {
+    identity: "plan:exact",
+    modelDigest: "model:accepted",
+    modelRevision: 0,
+    selectedModelDigest: "model:accepted",
+    matchesSelectedModel: true,
+    geometryDigest: null,
+    meshDigest: null,
+    solverBackend: "native-provider",
+    solverBackendVersion: "1.2.3",
+    metadata: {
+      schema: "eqiora.resolved-common-plan/v5",
+      temporal: { relative_tolerance: 0.000001 },
+      label: '<img src=x onerror="window.hacked=true">',
+    },
+  };
+  const render = async () =>
+    page.evaluate(
+      (state) =>
+        window.dispatchEvent(
+          new MessageEvent("message", { data: { type: "state", state } }),
+        ),
+      planState,
+    );
+  await render();
+  await expect(
+    page.getByText("Validated Plan for this exact Model artifact.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.locator("pre")).toContainText(
+    '"relative_tolerance": 0.000001',
+  );
+  await expect(page.locator("#content img")).toHaveCount(0);
+  await expect(
+    page.getByText(
+      /Complex and modal Result projections are not yet available/,
+    ),
+  ).toBeVisible();
+  planState.inspection!.plan!.matchesSelectedModel = false;
+  planState.inspection!.plan!.selectedModelDigest = "model:edited";
+  await render();
+  await expect(page.getByText(/different Model artifact/)).toBeVisible();
+  await expect(
+    page.getByText("Selected Model digest: model:edited", { exact: true }),
+  ).toBeVisible();
+  planState.inspection!.plan = null;
+  await render();
+  await expect(page.getByText(/has not been validated/)).toBeVisible();
+  await expect(page.locator("pre")).toHaveCount(0);
+});

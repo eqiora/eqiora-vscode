@@ -201,24 +201,51 @@ function render(): void {
       "Numerical Plan",
       "Mesh, discretization, solver and tolerances are selected separately when constructing a Plan.",
     );
-    numeric.append(action("Open Plan JSON…", { type: "attachPlan" }));
-    if (state.plan) {
+    numeric.append(action("Open numerical Plan…", { type: "attachPlan" }));
+    const plan = inspection.plan;
+    if (plan) {
       numeric.append(
-        element("h3", state.plan.name),
+        element("h3", state.plan?.name ?? "Numerical Plan"),
         element(
           "p",
-          "User-selected JSON, displayed as supplied. Its identity and compatibility with this model have not been validated.",
+          plan.matchesSelectedModel
+            ? "Validated Plan for this exact Model artifact."
+            : "Validated Plan for a different Model artifact. It is not bound to the selected model.",
           "notice",
         ),
-        element("pre", state.plan.text),
+        element("p", `Plan identity: ${plan.identity}`),
+        element("p", `Plan Model digest: ${plan.modelDigest}`),
+        element("p", `Plan Model revision: ${plan.modelRevision}`),
+        element("p", `Selected Model digest: ${plan.selectedModelDigest}`),
+        element(
+          "p",
+          `Backend: ${plan.solverBackend} ${plan.solverBackendVersion}`,
+        ),
+        element(
+          "p",
+          "Accepted numerical controls (canonical artifact vocabulary):",
+        ),
+        element("pre", JSON.stringify(plan.metadata, null, 2)),
       );
+      if (plan.geometryDigest)
+        numeric.append(element("p", `Geometry digest: ${plan.geometryDigest}`));
+      if (plan.meshDigest)
+        numeric.append(element("p", `Mesh digest: ${plan.meshDigest}`));
     } else
       numeric.append(
         element(
           "p",
-          "No numerical Plan is attached. This view does not select a solver or run a simulation.",
+          state.plan
+            ? "The attached Plan has not been validated for this view. Refresh to request validation."
+            : "No numerical Plan is attached. Save an existing Plan with plan.write('model.eqplan') in Python, then open it here.",
         ),
       );
+    numeric.append(
+      element(
+        "p",
+        "Read-only inspection does not run the Plan. Complex and modal Result projections are not yet available; phase, power and probability are not inferred by this view.",
+      ),
+    );
   } else {
     const block = section(
       "Semantic change preview",

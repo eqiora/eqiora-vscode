@@ -30,6 +30,18 @@ export interface Equation {
   fallback: boolean;
   references: string[];
 }
+export interface PlanProjection {
+  identity: string;
+  modelDigest: string;
+  modelRevision: number;
+  selectedModelDigest: string;
+  matchesSelectedModel: boolean;
+  geometryDigest: string | null;
+  meshDigest: string | null;
+  solverBackend: string;
+  solverBackendVersion: string;
+  metadata: Record<string, unknown>;
+}
 export interface Inspection {
   version: number;
   models: string[];
@@ -38,6 +50,7 @@ export interface Inspection {
   edges: ModelEdge[];
   equations: Equation[];
   fingerprint: string | null;
+  plan?: PlanProjection | null;
   errors: string[];
 }
 export type Page =
@@ -56,7 +69,7 @@ export interface ViewState {
   inspection?: Inspection;
   message?: string;
   baseline?: Baseline;
-  plan?: { name: string; text: string };
+  plan?: { name: string };
   fontSize: number;
 }
 export const nodeName = (node: ModelNode): string =>
@@ -98,5 +111,24 @@ export function inspectResponse(value: unknown): Inspection {
     !Array.isArray(result.errors)
   )
     throw new Error("Incompatible Eqiora inspection response");
+  if (result.plan != null) {
+    const plan = result.plan;
+    if (
+      typeof plan.identity !== "string" ||
+      typeof plan.modelDigest !== "string" ||
+      typeof plan.selectedModelDigest !== "string" ||
+      typeof plan.matchesSelectedModel !== "boolean" ||
+      typeof plan.solverBackend !== "string" ||
+      typeof plan.solverBackendVersion !== "string" ||
+      !Number.isSafeInteger(plan.modelRevision) ||
+      (plan.geometryDigest !== null &&
+        typeof plan.geometryDigest !== "string") ||
+      (plan.meshDigest !== null && typeof plan.meshDigest !== "string") ||
+      !plan.metadata ||
+      typeof plan.metadata !== "object" ||
+      Array.isArray(plan.metadata)
+    )
+      throw new Error("Incompatible Eqiora Plan inspection response");
+  }
   return result;
 }

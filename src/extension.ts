@@ -196,6 +196,7 @@ class Controller implements vscode.Disposable {
         this.selected.get(doc.uri.toString()),
         this.page === "changes",
         token,
+        this.page === "plan" ? this.plan?.text : undefined,
       );
       if (
         generation !== this.generation ||
@@ -233,7 +234,7 @@ class Controller implements vscode.Disposable {
       inspection: this.inspection,
       message,
       baseline: this.baseline,
-      plan: this.plan,
+      plan: this.plan ? { name: this.plan.name } : undefined,
       fontSize: vscode.workspace
         .getConfiguration("eqiora")
         .get<number>("preview.fontSize", 18),
@@ -297,20 +298,24 @@ class Controller implements vscode.Disposable {
   private async attachPlan(): Promise<void> {
     const selected = await vscode.window.showOpenDialog({
       canSelectMany: false,
-      filters: { "Plan JSON": ["json"] },
-      title: "Open an existing numerical Plan as read-only JSON",
+      filters: { "Eqiora Plan": ["eqplan"] },
+      title: "Open a canonical numerical Plan for validation",
     });
     if (!selected?.[0]) return;
     const stat = await vscode.workspace.fs.stat(selected[0]);
     if (stat.size > 2 * 1024 * 1024)
-      throw new Error("Plan JSON exceeds the 2 MiB display limit.");
+      throw new Error("Plan exceeds the 2 MiB editor admission limit.");
     const bytes = await vscode.workspace.fs.readFile(selected[0]);
     if (bytes.byteLength > 2 * 1024 * 1024)
-      throw new Error("Plan JSON exceeds the 2 MiB display limit.");
-    const value: unknown = JSON.parse(Buffer.from(bytes).toString("utf8"));
+      throw new Error("Plan exceeds the 2 MiB editor admission limit.");
+    const text = new TextDecoder("utf-8", {
+      fatal: true,
+      ignoreBOM: true,
+    }).decode(bytes);
+    this.inspection = undefined;
     this.plan = {
       name: path.basename(selected[0].fsPath),
-      text: JSON.stringify(value, null, 2),
+      text,
     };
     await this.show("plan");
   }
