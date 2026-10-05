@@ -54,7 +54,7 @@ class Controller implements vscode.Disposable {
       ["eqiora.boundaryTree", this.boundaries],
     ] as const)
       this.subscriptions.push(vscode.window.registerTreeDataProvider(id, tree));
-    const commands: Record<string, () => unknown> = {
+    const commands: Record<string, (...args: unknown[]) => unknown> = {
       restartServer: async () => {
         await this.servers.restart();
         await this.refresh();
@@ -67,8 +67,8 @@ class Controller implements vscode.Disposable {
       modelPlan: () => this.show("plan"),
       semanticChanges: () => this.show("changes"),
       selectModel: () => this.selectModel(),
-      attachPlan: () => this.attachArtifact("Plan"),
-      attachResult: () => this.attachArtifact("Result"),
+      attachPlan: (uri?: unknown) => this.attachArtifact("Plan", uri),
+      attachResult: (uri?: unknown) => this.attachArtifact("Result", uri),
       detachResult: () => this.detachResult(),
       captureBaseline: () => this.captureBaseline(),
       exportEquations: () => this.exportEquations(),
@@ -84,13 +84,16 @@ class Controller implements vscode.Disposable {
     };
     for (const [name, action] of Object.entries(commands))
       this.subscriptions.push(
-        vscode.commands.registerCommand(`eqiora.${name}`, async () => {
-          try {
-            return await action();
-          } catch (error) {
-            this.error(error);
-          }
-        }),
+        vscode.commands.registerCommand(
+          `eqiora.${name}`,
+          async (...args: unknown[]) => {
+            try {
+              return await action(...args);
+            } catch (error) {
+              this.error(error);
+            }
+          },
+        ),
       );
     this.subscriptions.push(
       vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -305,16 +308,26 @@ class Controller implements vscode.Disposable {
     this.inspection = undefined;
     await this.show("plan");
   }
-  private async attachArtifact(kind: "Plan" | "Result"): Promise<void> {
+  private async attachArtifact(
+    kind: "Plan" | "Result",
+    uri?: unknown,
+  ): Promise<void> {
     if (kind === "Result" && !this.plan)
       throw new Error("Open the Result's numerical Plan first.");
-    const selected = await vscode.window.showOpenDialog({
-      canSelectMany: false,
-      filters: {
-        [`Eqiora ${kind}`]: [kind === "Plan" ? "eqplan" : "eqresult"],
-      },
-      title: `Open a canonical ${kind} for validation`,
-    });
+    if (uri !== undefined && !(uri instanceof vscode.Uri))
+      throw new TypeError(
+        "An artifact command argument must be a VS Code URI.",
+      );
+    const selected =
+      uri instanceof vscode.Uri
+        ? [uri]
+        : await vscode.window.showOpenDialog({
+            canSelectMany: false,
+            filters: {
+              [`Eqiora ${kind}`]: [kind === "Plan" ? "eqplan" : "eqresult"],
+            },
+            title: `Open a canonical ${kind} for validation`,
+          });
     if (!selected?.[0]) return;
     const stat = await vscode.workspace.fs.stat(selected[0]);
     if (stat.size > 2 * 1024 * 1024)

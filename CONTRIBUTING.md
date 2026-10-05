@@ -18,6 +18,17 @@ EQIORA_SERVER=/absolute/path/to/eqiora-language-server npm run test:editor
 EQIORA_SERVER=/absolute/path/to/eqiora-language-server xvfb-run -a npm run test:editor
 ```
 
+When updating the pinned server, regenerate the canonical Result fixtures with
+Python Eqiora built from that same revision:
+
+```sh
+python scripts/generate-result-fixture.py
+```
+
+The real editor test opens the fixture Plan and Result through the ordinary
+extension commands, checks complex values and explicit power, then rejects a stale
+Model and verifies detachment recovery. A stale artifact generation fails this test.
+
 The editor integration test starts real VS Code and the real Rust server. Unit
 tests exercise comparison boundaries and presentation safety. CI builds and tests
 native packages on Linux x64, Windows x64 and macOS ARM64.

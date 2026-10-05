@@ -1,0 +1,7 @@
+model Response(){
+ variable z:complex<V>;
+ relation response{math.complex(1,-2)*z=math.complex(11[V],-2[V]);}
+ observable voltage:complex<V>=z;
+ observable peak_power:W=math.real(z*math.conj(math.complex(1[A],2[A])))/2;
+ observable zero:complex<V>=math.complex(0[V],0[V]);
+}
