@@ -109,6 +109,28 @@ Model rejects, instead of retaining stale values. Use **Detach Numerical Result*
 to return to Plan inspection after editing; opening another Plan also clears the
 attached Result.
 
+For a loose workspace (without a package-resolution project), the editor compiles
+under the `editor.workspace` namespace. Use that same explicit namespace and the
+file's workspace-relative module name when constructing the Python Model. For a
+file `response.eqi` at the workspace root:
+
+```python
+from pathlib import Path
+import eqiora
+
+module = eqiora.Module.parse(
+    "response", Path("response.eqi").read_text(), package="editor.workspace"
+)
+model = eqiora.compile(source=module, entry="Response")
+# Resolve and run this model with your explicit numerical choices.
+# plan.write("response.eqplan")
+# result.write("response.eqresult")
+```
+
+Nested paths use dotted module names. Package workspaces must instead use their
+exact package compilation and dependency resolution. Merely compiling the same
+text under a different namespace does not establish exact Model identity.
+
 The table preserves each Observable's declared type, shape, component order and
 Result lineage. Real and imaginary parts and magnitude retain the source units;
 squared magnitude has squared units. Phase is the principal argument in radians,
