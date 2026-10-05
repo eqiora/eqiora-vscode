@@ -1,12 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
+- Bundle native-validated numerical Plan and Result inspection. Show typed complex
+  components and explicit Observables with units, exact artifact lineage and
+  undefined phase at zero. Keep modal/phasor interpretation explicit.
+- Refresh the bundled server and canonical syntax to the current Eqiora generation.
+- Update KaTeX, the language client and development tools while retaining the
+  declared VS Code 1.100 API baseline.
 - Complete keywords/templates, current-scope names, import paths, public/exposed
   members and remaining named arguments, including incomplete source (#7–#10).
 - Keep canonical snippet placeholders and Tab navigation without duplicate keywords.
 - Discard cancelled or superseded completion responses.
-
 - Update the language server for documented standard-function hover, local
   completion and argument help, including authored declaration and parameter comments.
 - Explain common language keywords and mathematical types in hover and completion.

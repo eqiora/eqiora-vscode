@@ -66,3 +66,39 @@ test("malformed native Plan projections reject without deriving replacement valu
     /Plan inspection/,
   );
 });
+
+import { resultFixture, resultPlan } from "./result-fixture";
+test("Result projections retain native exact lineage and reject malformed values", () => {
+  const accepted = { ...current, plan: resultPlan, result: resultFixture };
+  assert.equal(inspectResponse(accepted), accepted);
+  for (const mutate of [
+    (value: typeof accepted) => {
+      value.result.version = 2 as 1;
+    },
+    (value: typeof accepted) => {
+      value.result.planIdentity = "foreign";
+    },
+    (value: typeof accepted) => {
+      value.result.modelDigest = "foreign";
+    },
+    (value: typeof accepted) => {
+      value.plan.matchesSelectedModel = false;
+    },
+    (value: typeof accepted) => {
+      value.result.observations[0].components![0].real = {
+        value: NaN,
+        unit: "V",
+      };
+    },
+    (value: typeof accepted) => {
+      value.result.observations[0].components![0].phase = { value: 0 } as never;
+    },
+    (value: typeof accepted) => {
+      value.result.observations[0].components![0].index = 2;
+    },
+  ]) {
+    const malformed = structuredClone(accepted);
+    mutate(malformed);
+    assert.throws(() => inspectResponse(malformed), /Result inspection/);
+  }
+});

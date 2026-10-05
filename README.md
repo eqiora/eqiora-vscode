@@ -21,6 +21,10 @@ connects its language server to VS Code and renders its inspection results.
 - **Model / Plan:** physical model inventory alongside an explicitly opened numerical
   Plan artifact (`.eqplan`). A server with Plan inspection support validates canonical
   bytes and reports exact Model binding; the view does not execute the Plan.
+- **Result observations:** open a canonical `.eqresult` with its exact Plan to see
+  typed Observable components, real/imaginary parts, magnitude, squared magnitude
+  and principal phase. Native validation preserves units and exact Result lineage;
+  phase at zero magnitude is undefined and is never substituted with a number.
 - **Semantic Changes:** capture a baseline and compare the compiler's bounded
   structural fingerprint, alongside before/after equation text.
 
@@ -76,15 +80,14 @@ successful preview. Boundaries are a topological view, not a CAD viewport.
 
 Structural comparison uses the compiler's supported vocabulary and resource bounds;
 it does not promise identical solver outputs. This extension does not run models,
-infer solvers, display complex or modal Results or implement rename. Completion
+infer solvers, display modal Results or implement rename. Completion
 covers keywords/templates, current-scope names, canonical imports, public and
-exposed members, and remaining named arguments. Updated development servers also
+exposed members, and remaining named arguments. The bundled server also
 rank simple name/path references in Model parameter initializers, named Component
 parameter bindings and scalar connection endpoints by compiler-owned compatibility.
 Compatible candidates come before unknown and incompatible candidates; unresolved
 contexts retain ordinary name completion. See the [guide](docs/guide.md) for the
-supported type/unit and endpoint checks. This ranking is not in the published
-server bundle; select an updated development server with `eqiora.server.path`.
+supported type/unit and endpoint checks. This ranking is supplied by the pinned native server.
 
 ## Ownership
 
@@ -98,8 +101,9 @@ The syntax bundle and brand mark are copied from an exact Eqiora commit by
 
 Licensed under Apache-2.0. KaTeX is included under its MIT license.
 
-Numerical Plan inspection requires a server advertising `eqioraPlanInspection: 1`;
-the currently bundled server predates this capability and reports a clear unsupported
-message. Set `eqiora.server.path` to a compatible development server until the next
-server bundle is published. Accepted artifacts use the native canonical Plan codec
-and installed provider versions; arbitrary or reformatted JSON is rejected.
+Numerical Plan and Result inspection require `eqioraPlanInspection: 1` and
+`eqioraResultInspection: 1`, respectively. The bundled server supplies both.
+Accepted artifacts use the native canonical codecs and installed provider versions;
+arbitrary, stale, reformatted or incompatible artifact bytes are rejected.
+Models and artifacts must come from the same Eqiora generation as the pinned server.
+A different external server reports unsupported inspection explicitly.

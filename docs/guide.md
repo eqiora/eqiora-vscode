@@ -64,23 +64,25 @@ development, select the newly built server with `eqiora.server.path`.
 
 All commands are available from the Command Palette under **Eqiora**:
 
-| Command                           | Purpose                                               |
-| --------------------------------- | ----------------------------------------------------- |
-| Open Equation Preview             | Live equations and quantity navigation                |
-| Select Model                      | Choose among models in the current file               |
-| Export Equations as LaTeX         | Open generated equations in a new unsaved document    |
-| Inspect Ports and Connections     | Inspect compiler-owned connections and roles          |
-| Open Boundary Condition Map       | Inspect support and boundary topology                 |
-| Inspect Model and Numerical Plan  | Distinguish physics from numerical choices            |
-| Open Numerical Plan               | Validate an existing `.eqplan` artifact, up to 2 MiB  |
-| Capture Model Comparison Baseline | Capture the compiler's structural fingerprint         |
-| Preview Semantic Changes          | Compare the selected model with its captured baseline |
-| Select Language Server            | Set the executable on the workspace host              |
-| Restart Language Server           | Restart after changing installations                  |
-| Show Language Server Log          | Diagnose startup, version or analysis failures        |
-| Refresh Model Views               | Request a new snapshot                                |
-| Open Example Model                | Open the included decay model                         |
-| Open Eqiora Guide                 | Open the mathematical modeling textbook               |
+| Command                           | Purpose                                                       |
+| --------------------------------- | ------------------------------------------------------------- |
+| Open Equation Preview             | Live equations and quantity navigation                        |
+| Select Model                      | Choose among models in the current file                       |
+| Export Equations as LaTeX         | Open generated equations in a new unsaved document            |
+| Inspect Ports and Connections     | Inspect compiler-owned connections and roles                  |
+| Open Boundary Condition Map       | Inspect support and boundary topology                         |
+| Inspect Model and Numerical Plan  | Distinguish physics from numerical choices                    |
+| Open Numerical Plan               | Validate an existing `.eqplan` artifact, up to 2 MiB          |
+| Open Numerical Result             | Inspect typed observations from an exact `.eqresult` and Plan |
+| Detach Numerical Result           | Remove an attached Result and recover the Model / Plan view   |
+| Capture Model Comparison Baseline | Capture the compiler's structural fingerprint                 |
+| Preview Semantic Changes          | Compare the selected model with its captured baseline         |
+| Select Language Server            | Set the executable on the workspace host                      |
+| Restart Language Server           | Restart after changing installations                          |
+| Show Language Server Log          | Diagnose startup, version or analysis failures                |
+| Refresh Model Views               | Request a new snapshot                                        |
+| Open Example Model                | Open the included decay model                                 |
+| Open Eqiora Guide                 | Open the mathematical modeling textbook                       |
 
 The baseline is kept in memory for the current extension session. It applies to one
 exact document URI and selected model.
@@ -94,12 +96,58 @@ in a different namespace, with different bindings or geometry, can have a
 different exact identity. Editing or switching the selected Model requests a new
 comparison. No numerical solve is performed.
 
-This requires `eqioraPlanInspection: 1`, which the currently bundled server does
-not advertise. Use a compatible development server through `eqiora.server.path`.
-Malformed, noncanonical, incompatible-provider and oversized artifacts are
-rejected by the native owner. The renderer does not infer numerical settings or
-complex Result quantities. Complex and modal Result projections await the native
-typed Result API, including undefined phase at zero magnitude.
+The bundled server advertises `eqioraPlanInspection: 1` and
+`eqioraResultInspection: 1`. External servers must advertise the corresponding
+capability. Malformed, noncanonical, incompatible-provider and oversized artifacts
+are rejected by the native owner.
+
+Save an accepted Result with `result.write("model.eqresult")`, then choose **Open
+Numerical Result** after opening its exact Plan. Each artifact is limited to 2 MiB.
+The native server replays the Result against the Plan and requires the selected
+Model's exact digest before evaluating its typed Observables. A changed or foreign
+Model rejects, instead of retaining stale values. Use **Detach Numerical Result**
+to return to Plan inspection after editing; opening another Plan also clears the
+attached Result.
+
+For a loose workspace (without a package-resolution project), the editor compiles
+under the `editor.workspace` namespace. Use that same explicit namespace and the
+file's workspace-relative module name when constructing the Python Model. For a
+file `response.eqi` at the workspace root:
+
+```python
+from pathlib import Path
+import eqiora
+
+module = eqiora.Module.parse(
+    "response", Path("response.eqi").read_text(), package="editor.workspace"
+)
+model = eqiora.compile(source=module, entry="Response")
+# Resolve and run this model with your explicit numerical choices.
+# plan.write("response.eqplan")
+# result.write("response.eqresult")
+```
+
+Nested paths use dotted module names. Package workspaces must instead use their
+exact package compilation and dependency resolution. Merely compiling the same
+text under a different namespace does not establish exact Model identity.
+
+The table preserves each Observable's declared type, shape, component order and
+Result lineage. Real and imaginary parts and magnitude retain the source units;
+squared magnitude has squared units. Phase is the principal argument in radians,
+undefined at exact zero, with no threshold or unwrapping. Undefined phase is text
+in the table, including accessible and print output, never a fabricated zero.
+Nonfinite projections and unavailable Observables have explicit messages. Spatial
+Observables requiring coordinates or quadrature need an explicit evaluation path
+and are not silently sampled by the editor. At most 4096 components are displayed.
+
+These are mathematical component projections. The viewer does not infer peak/RMS
+phasor conventions, power factors, spectral density, probability normalization or
+modal phase references. Author such physical quantities as typed Observables in
+the Model: for example `math.abs2(psi[0]) + math.abs2(psi[1])` for a declared finite
+orthonormal state, or the explicit chosen phasor power expression. The server
+evaluates those same Observables as Python's `result.observe(...)`; Python also
+exposes the shared projection through `observation.project_component("magnitude")`.
+Modal Result projections remain unavailable until the native feature ships.
 
 ## Settings
 

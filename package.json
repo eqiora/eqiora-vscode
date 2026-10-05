@@ -2,7 +2,7 @@
   "name": "eqiora",
   "displayName": "Eqiora",
   "description": "Write physical models, inspect equations, and explore connections with Eqiora.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "eqiora",
   "license": "Apache-2.0",
   "icon": "media/icon.png",
@@ -129,6 +129,16 @@
       {
         "command": "eqiora.attachPlan",
         "title": "Open Numerical Plan",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.attachResult",
+        "title": "Open Numerical Result",
+        "category": "Eqiora"
+      },
+      {
+        "command": "eqiora.detachResult",
+        "title": "Detach Numerical Result",
         "category": "Eqiora"
       },
       {

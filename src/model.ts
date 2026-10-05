@@ -42,6 +42,36 @@ export interface PlanProjection {
   solverBackendVersion: string;
   metadata: Record<string, unknown>;
 }
+export type ProjectionValue =
+  | { value: number; unit: string }
+  | { undefined: string }
+  | { unavailable: string };
+export interface ResultComponent {
+  index: number;
+  real: ProjectionValue;
+  imaginary: ProjectionValue;
+  magnitude: ProjectionValue;
+  squaredMagnitude: ProjectionValue;
+  phase: ProjectionValue;
+}
+export interface ResultObservation {
+  id: string;
+  names: string[];
+  valueType?: string;
+  shape?: number[];
+  components?: ResultComponent[];
+  unsupported?: string;
+}
+export interface ResultProjection {
+  version: 1;
+  identity: string;
+  planIdentity: string;
+  modelDigest: string;
+  observations: ResultObservation[];
+  interpretation: string;
+  phaseConvention: string;
+  modal: string;
+}
 export interface Inspection {
   version: number;
   models: string[];
@@ -51,6 +81,7 @@ export interface Inspection {
   equations: Equation[];
   fingerprint: string | null;
   plan?: PlanProjection | null;
+  result?: ResultProjection | null;
   errors: string[];
 }
 export type Page =
@@ -70,6 +101,7 @@ export interface ViewState {
   message?: string;
   baseline?: Baseline;
   plan?: { name: string };
+  result?: { name: string };
   fontSize: number;
 }
 export const nodeName = (node: ModelNode): string =>
@@ -130,5 +162,67 @@ export function inspectResponse(value: unknown): Inspection {
     )
       throw new Error("Incompatible Eqiora Plan inspection response");
   }
+  if (result.result != null) {
+    const view = result.result;
+    if (
+      view.version !== 1 ||
+      typeof view.identity !== "string" ||
+      !result.plan ||
+      !result.plan.matchesSelectedModel ||
+      view.planIdentity !== result.plan.identity ||
+      view.modelDigest !== result.plan.selectedModelDigest ||
+      typeof view.interpretation !== "string" ||
+      typeof view.phaseConvention !== "string" ||
+      typeof view.modal !== "string" ||
+      !Array.isArray(view.observations) ||
+      !view.observations.every(validObservation)
+    )
+      throw new Error("Incompatible Eqiora Result inspection response");
+  }
   return result;
+}
+function validProjection(value: unknown): value is ProjectionValue {
+  if (!value || typeof value !== "object") return false;
+  const row = value as Record<string, unknown>;
+  if (
+    Object.keys(row).length === 2 &&
+    typeof row.value === "number" &&
+    Number.isFinite(row.value) &&
+    typeof row.unit === "string"
+  )
+    return true;
+  return (
+    Object.keys(row).length === 1 &&
+    (typeof row.undefined === "string" || typeof row.unavailable === "string")
+  );
+}
+function validObservation(value: unknown): value is ResultObservation {
+  if (!value || typeof value !== "object") return false;
+  const row = value as ResultObservation;
+  if (
+    typeof row.id !== "string" ||
+    !Array.isArray(row.names) ||
+    !row.names.every((name) => typeof name === "string")
+  )
+    return false;
+  if (row.unsupported !== undefined)
+    return typeof row.unsupported === "string" && row.components === undefined;
+  return (
+    typeof row.valueType === "string" &&
+    Array.isArray(row.shape) &&
+    row.shape.every((n) => Number.isSafeInteger(n) && n > 0) &&
+    Array.isArray(row.components) &&
+    row.components.every(
+      (component, index) =>
+        component &&
+        component.index === index &&
+        [
+          component.real,
+          component.imaginary,
+          component.magnitude,
+          component.squaredMagnitude,
+          component.phase,
+        ].every(validProjection),
+    )
+  );
 }

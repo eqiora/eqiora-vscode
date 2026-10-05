@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+import { resultFixture, resultPlan } from "./result-fixture";
 import type { ViewState } from "../src/model";
 const state: ViewState = {
   page: "equations",
@@ -179,11 +180,7 @@ test("Plan viewer preserves native binding, numerical controls and unsupported r
     '"relative_tolerance": 0.000001',
   );
   await expect(page.locator("#content img")).toHaveCount(0);
-  await expect(
-    page.getByText(
-      /Complex and modal Result projections are not yet available/,
-    ),
-  ).toBeVisible();
+  await expect(page.getByText(/No validated Result is attached/)).toBeVisible();
   planState.inspection!.plan!.matchesSelectedModel = false;
   planState.inspection!.plan!.selectedModelDigest = "model:edited";
   await render();
@@ -195,4 +192,76 @@ test("Plan viewer preserves native binding, numerical controls and unsupported r
   await render();
   await expect(page.getByText(/has not been validated/)).toBeVisible();
   await expect(page.locator("pre")).toHaveCount(0);
+});
+
+test("Result table preserves native numbers, units, lineage and undefined phase without HTML", async ({
+  page,
+}) => {
+  await page.setContent(
+    '<div id="subtitle"></div><button id="refresh">Refresh</button><nav id="tabs"></nav><main id="content"></main>',
+  );
+  await page.evaluate(() => {
+    (
+      window as unknown as { acquireVsCodeApi: () => unknown }
+    ).acquireVsCodeApi = () => ({
+      postMessage: (message: unknown) => {
+        (window as unknown as { lastMessage: unknown }).lastMessage = message;
+      },
+    });
+  });
+  await page.addScriptTag({
+    content: await readFile("dist/webview.js", "utf8"),
+  });
+  const resultState = structuredClone(state);
+  resultState.page = "plan";
+  resultState.plan = { name: "response.eqplan" };
+  resultState.result = { name: "response.eqresult" };
+  resultState.inspection!.plan = resultPlan;
+  resultState.inspection!.result = structuredClone(resultFixture);
+  resultState.inspection!.result!.observations[0].names = [
+    '<img src=x onerror="window.hacked=true">',
+  ];
+  await page.evaluate(
+    (state) =>
+      window.dispatchEvent(
+        new MessageEvent("message", { data: { type: "state", state } }),
+      ),
+    resultState,
+  );
+  await expect(
+    page.getByText("Result identity: result:exact", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Result Plan identity: plan:exact", { exact: true }),
+  ).toBeVisible();
+  const response = page.getByRole("table").first();
+  for (const value of ["3 V", "4 V", "5 V", "25 V²", "0.9272952180016122 rad"])
+    await expect(
+      response.getByRole("cell", { name: value, exact: true }),
+    ).toBeVisible();
+  const zero = page.getByRole("table").nth(1);
+  await expect(
+    zero.getByRole("cell", {
+      name: "Phase is undefined at zero magnitude",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    zero.getByRole("cell", { name: "0 rad", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText(/Modal Result projections are unavailable/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/requires explicit spatial sampling/),
+  ).toBeVisible();
+  await expect(page.locator("#content img")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Detach Result", exact: true })
+    .click();
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { lastMessage: unknown }).lastMessage,
+    ),
+  ).toEqual({ type: "detachResult" });
 });

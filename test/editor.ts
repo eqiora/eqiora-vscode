@@ -1,3 +1,4 @@
+import { resultChecks } from "./result-editor";
 import * as vscode from "vscode";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
@@ -135,5 +136,9 @@ model Documented() {
     !api.inspection() || api.inspection()!.equations.length === 0,
     "invalid edits cannot retain stale equations",
   );
+  await vscode.commands.executeCommand(
+    "workbench.action.revertAndCloseActiveEditor",
+  );
+  await resultChecks(api);
   await vscode.commands.executeCommand("workbench.action.closeAllEditors");
 }
