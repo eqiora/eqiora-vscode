@@ -24,7 +24,7 @@ connects its language server to VS Code and renders its inspection results.
 - **Result observations:** open a canonical `.eqresult` with its exact Plan to see
   typed Observable components, real/imaginary parts, magnitude, squared magnitude
   and principal phase. Native validation preserves units and exact Result lineage;
-  zero phase is undefined and is never substituted with a number.
+  phase at zero magnitude is undefined and is never substituted with a number.
 - **Semantic Changes:** capture a baseline and compare the compiler's bounded
   structural fingerprint, alongside before/after equation text.
 
