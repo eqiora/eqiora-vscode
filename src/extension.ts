@@ -35,6 +35,7 @@ class Controller implements vscode.Disposable {
   private page: Page = "equations";
   private baseline?: Baseline;
   private plan?: { name: string; text: string };
+  private result?: { name: string; text: string };
   private timer?: ReturnType<typeof setTimeout>;
   private generation = 0;
   private cancellation?: vscode.CancellationTokenSource;
@@ -66,7 +67,9 @@ class Controller implements vscode.Disposable {
       modelPlan: () => this.show("plan"),
       semanticChanges: () => this.show("changes"),
       selectModel: () => this.selectModel(),
-      attachPlan: () => this.attachPlan(),
+      attachPlan: () => this.attachArtifact("Plan"),
+      attachResult: () => this.attachArtifact("Result"),
+      detachResult: () => this.detachResult(),
       captureBaseline: () => this.captureBaseline(),
       exportEquations: () => this.exportEquations(),
       openGuide: () =>
@@ -197,6 +200,7 @@ class Controller implements vscode.Disposable {
         this.page === "changes",
         token,
         this.page === "plan" ? this.plan?.text : undefined,
+        this.page === "plan" ? this.result?.text : undefined,
       );
       if (
         generation !== this.generation ||
@@ -235,6 +239,7 @@ class Controller implements vscode.Disposable {
       message,
       baseline: this.baseline,
       plan: this.plan ? { name: this.plan.name } : undefined,
+      result: this.result ? { name: this.result.name } : undefined,
       fontSize: vscode.workspace
         .getConfiguration("eqiora")
         .get<number>("preview.fontSize", 18),
@@ -295,28 +300,38 @@ class Controller implements vscode.Disposable {
     };
     await this.show("changes");
   }
-  private async attachPlan(): Promise<void> {
+  private async detachResult(): Promise<void> {
+    this.result = undefined;
+    this.inspection = undefined;
+    await this.show("plan");
+  }
+  private async attachArtifact(kind: "Plan" | "Result"): Promise<void> {
+    if (kind === "Result" && !this.plan)
+      throw new Error("Open the Result's numerical Plan first.");
     const selected = await vscode.window.showOpenDialog({
       canSelectMany: false,
-      filters: { "Eqiora Plan": ["eqplan"] },
-      title: "Open a canonical numerical Plan for validation",
+      filters: {
+        [`Eqiora ${kind}`]: [kind === "Plan" ? "eqplan" : "eqresult"],
+      },
+      title: `Open a canonical ${kind} for validation`,
     });
     if (!selected?.[0]) return;
     const stat = await vscode.workspace.fs.stat(selected[0]);
     if (stat.size > 2 * 1024 * 1024)
-      throw new Error("Plan exceeds the 2 MiB editor admission limit.");
+      throw new Error(`${kind} exceeds the 2 MiB editor admission limit.`);
     const bytes = await vscode.workspace.fs.readFile(selected[0]);
     if (bytes.byteLength > 2 * 1024 * 1024)
-      throw new Error("Plan exceeds the 2 MiB editor admission limit.");
+      throw new Error(`${kind} exceeds the 2 MiB editor admission limit.`);
     const text = new TextDecoder("utf-8", {
       fatal: true,
       ignoreBOM: true,
     }).decode(bytes);
     this.inspection = undefined;
-    this.plan = {
-      name: path.basename(selected[0].fsPath),
-      text,
-    };
+    const artifact = { name: path.basename(selected[0].fsPath), text };
+    if (kind === "Plan") {
+      this.plan = artifact;
+      this.result = undefined;
+    } else this.result = artifact;
     await this.show("plan");
   }
   private async exportEquations(): Promise<void> {
@@ -388,7 +403,9 @@ class Controller implements vscode.Disposable {
     } else if (input.type === "refresh") await this.refresh();
     else if (input.type === "selectModel") await this.selectModel();
     else if (input.type === "baseline") await this.captureBaseline();
-    else if (input.type === "attachPlan") await this.attachPlan();
+    else if (input.type === "attachPlan") await this.attachArtifact("Plan");
+    else if (input.type === "attachResult") await this.attachArtifact("Result");
+    else if (input.type === "detachResult") await this.detachResult();
     else if (input.type === "export") await this.exportEquations();
   }
   dispose(): void {

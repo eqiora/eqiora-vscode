@@ -16,3 +16,8 @@ details { margin-top: 16px; } summary { cursor: pointer; color: var(--vscode-des
 .counts { display: flex; flex-wrap: wrap; gap: 12px; } .counts > div { border: 1px solid var(--vscode-panel-border, #8885); padding: 12px; border-radius: 6px; }
 .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-top: 20px; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+.result-table { overflow-x: auto; }
+.result-table table { border-collapse: collapse; width: 100%; }
+.result-table caption { text-align: left; padding: 8px 0; }
+.result-table th, .result-table td { text-align: left; padding: 8px; border: 1px solid var(--vscode-panel-border, #777); }

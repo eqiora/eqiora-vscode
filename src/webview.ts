@@ -5,6 +5,7 @@ import {
   type ViewState,
   type Page,
   type ModelNode,
+  type ProjectionValue,
 } from "./model";
 declare function acquireVsCodeApi(): { postMessage(message: unknown): void };
 const vscode = acquireVsCodeApi();
@@ -240,12 +241,95 @@ function render(): void {
             : "No numerical Plan is attached. Save an existing Plan with plan.write('model.eqplan') in Python, then open it here.",
         ),
       );
-    numeric.append(
-      element(
-        "p",
-        "Read-only inspection does not run the Plan. Complex and modal Result projections are not yet available; phase, power and probability are not inferred by this view.",
-      ),
+    numeric.append(element("p", "Read-only inspection does not run the Plan."));
+    const results = section(
+      "Result observations",
+      "Open a saved Result with its exact numerical Plan. Scientific projections come from Eqiora.",
     );
+    results.append(action("Open numerical Result…", { type: "attachResult" }));
+    if (state.result)
+      results.append(action("Detach Result", { type: "detachResult" }));
+    const result = inspection.result;
+    if (!result)
+      results.append(
+        element(
+          "p",
+          "No validated Result is attached. Modal projections are unavailable; phase, power and probability are not inferred by this view.",
+        ),
+      );
+    else {
+      results.append(element("h3", state.result?.name ?? "Numerical Result"));
+      results.append(element("p", `Result identity: ${result.identity}`));
+      results.append(
+        element("p", `Result Plan identity: ${result.planIdentity}`),
+      );
+      results.append(element("p", result.interpretation));
+      results.append(element("p", result.phaseConvention));
+      results.append(element("p", result.modal));
+      if (!result.observations.length)
+        results.append(
+          element("p", "No typed Observables are declared in this Model."),
+        );
+      for (const observation of result.observations) {
+        const title = observation.names.join(" / ") || observation.id;
+        results.append(element("h3", title));
+        results.append(element("p", `Observable: ${observation.id}`));
+        if (observation.valueType)
+          results.append(
+            element(
+              "p",
+              `Type: ${observation.valueType}; shape: [${observation.shape?.join(", ") ?? ""}]`,
+            ),
+          );
+        if (observation.unsupported) {
+          results.append(element("p", observation.unsupported, "notice"));
+          continue;
+        }
+        const table = element("table");
+        table.append(
+          element(
+            "caption",
+            `${title}: declared components in row-major order`,
+          ),
+        );
+        const head = element("thead"),
+          header = element("tr");
+        for (const label of [
+          "Component",
+          "Real",
+          "Imaginary",
+          "Magnitude",
+          "Squared magnitude",
+          "Phase (radians)",
+        ]) {
+          const th = element("th", label);
+          th.scope = "col";
+          header.append(th);
+        }
+        head.append(header);
+        table.append(head);
+        const body = element("tbody");
+        for (const component of observation.components ?? []) {
+          const row = element("tr");
+          const label = element("th", String(component.index));
+          label.scope = "row";
+          row.append(label);
+          for (const value of [
+            component.real,
+            component.imaginary,
+            component.magnitude,
+            component.squaredMagnitude,
+            component.phase,
+          ])
+            row.append(element("td", projectionText(value)));
+          body.append(row);
+        }
+        table.append(body);
+        const scroll = element("div", undefined, "result-table");
+        scroll.append(table);
+        results.append(scroll);
+      }
+    }
   } else {
     const block = section(
       "Semantic change preview",
@@ -299,3 +383,9 @@ window.addEventListener("message", (event) => {
   }
 });
 vscode.postMessage({ type: "ready" });
+
+function projectionText(value: ProjectionValue): string {
+  if ("value" in value) return `${value.value} ${value.unit}`;
+  if ("undefined" in value) return value.undefined;
+  return `Unavailable: ${value.unavailable}`;
+}
