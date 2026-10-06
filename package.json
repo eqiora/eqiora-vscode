@@ -301,7 +301,7 @@
     "test:views": "playwright test"
   },
   "dependencies": {
-    "katex": "0.18.9",
+    "katex": "0.19.0",
     "vscode-languageclient": "10.1.2"
   },
   "devDependencies": {
