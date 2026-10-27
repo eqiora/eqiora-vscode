@@ -302,7 +302,7 @@
   },
   "dependencies": {
     "katex": "0.18.9",
-    "vscode-languageclient": "10.1.2"
+    "vscode-languageclient": "11.0.0"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
